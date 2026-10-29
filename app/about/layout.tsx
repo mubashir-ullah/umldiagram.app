@@ -1,32 +1,23 @@
 import type { Metadata } from "next";
-import Script from "next/script";
 import {
-  getOrganizationSchema,
   generateStructuredDataScript,
+  getAboutPageSchema,
+  getBreadcrumbListSchema,
 } from "@/lib/seo/structured-data";
 import { SITE_URL } from "@/lib/seo/config";
 
 export const metadata: Metadata = {
   title: { absolute: "About UML Diagram Studio" },
   description:
-    "UML Diagram Studio is a free browser UML diagram tool with PlantUML, Mermaid, live preview, AI chat, and PNG or SVG export.",
+    "UML Diagram Studio is a free browser UML diagram toolkit with PlantUML live preview, focused makers, and PNG or SVG export.",
   keywords: [
     "uml diagram",
     "uml diagram tool",
     "free uml tool",
-    "uml diagram creator",
     "PlantUML",
-    "Mermaid diagrams",
     "class diagrams",
     "sequence diagrams",
-    "software architecture",
-    "diagramming tool",
-    "AI diagram generator",
-    "visual diagramming",
-    "software design",
-    "system architecture",
     "uml online",
-    "diagram creator",
   ],
   metadataBase: new URL(SITE_URL),
   alternates: {
@@ -34,7 +25,8 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "About UML Diagram Studio - Free UML Diagram Tool",
-    description: "Learn about UML Diagram Studio, the free online UML diagram tool for creating professional diagrams with AI assistance.",
+    description:
+      "Learn about UML Diagram Studio, the free online UML diagram toolkit for class, sequence, activity, and more.",
     url: `${SITE_URL}/about`,
     siteName: "UML Diagram Studio",
     type: "website",
@@ -50,7 +42,8 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "About UML Diagram Studio - Free UML Diagram Tool",
-    description: "Learn about UML Diagram Studio, the free online UML diagram tool for creating professional diagrams with AI assistance.",
+    description:
+      "Learn about UML Diagram Studio, the free online UML diagram toolkit for class, sequence, activity, and more.",
     images: [`${SITE_URL}/og-image.png`],
   },
 };
@@ -62,15 +55,26 @@ export default function AboutLayout({
 }) {
   return (
     <>
-      <Script
-        id="about-organization-schema"
+      <script
+        id="about-page-schema"
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: generateStructuredDataScript(getOrganizationSchema()),
+          __html: generateStructuredDataScript(getAboutPageSchema()),
+        }}
+      />
+      <script
+        id="about-breadcrumb-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: generateStructuredDataScript(
+            getBreadcrumbListSchema([
+              { name: "Home", url: SITE_URL },
+              { name: "About", url: `${SITE_URL}/about` },
+            ])
+          ),
         }}
       />
       {children}
     </>
   );
 }
-

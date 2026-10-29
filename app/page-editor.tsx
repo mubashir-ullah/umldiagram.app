@@ -2,8 +2,7 @@
 
 import { useState, useCallback, useRef, useEffect } from "react";
 import dynamic from "next/dynamic";
-import { ChatSidebar } from "@/components/chat-sidebar";
-import { TopBar } from "@/components/top-bar";
+import { StudioTopBar } from "@/components/studio-top-bar";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 
 const CodeEditor = dynamic(() => import("@/components/code-editor").then(mod => mod.CodeEditor), {
@@ -15,8 +14,6 @@ const DiagramPreview = dynamic(() => import("@/components/diagram-preview").then
   ssr: false,
   loading: () => <div className="h-full w-full bg-background animate-pulse" />
 });
-
-import type { ChatMessage } from "@shared/schema";
 
 const DEFAULT_CODE = `@startuml
 !theme plain
@@ -49,13 +46,10 @@ const STORAGE_KEY = 'plantuml-code';
 
 export function PageEditor() {
   const [code, setCode] = useState(DEFAULT_CODE);
-  const [isChatOpen, setIsChatOpen] = useState(false);
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [refreshKey, setRefreshKey] = useState(0);
-  const debounceTimerRef = useRef<NodeJS.Timeout>();
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout>>();
   const isInitialMount = useRef(true);
 
-  // Load code from localStorage on mount
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const savedCode = localStorage.getItem(STORAGE_KEY);
@@ -66,25 +60,21 @@ export function PageEditor() {
     }
   }, []);
 
-  // Save code to localStorage whenever it changes (debounced)
   useEffect(() => {
     if (isInitialMount.current) {
       return;
     }
 
     if (typeof window !== 'undefined') {
-      // Clear existing timer
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
       }
 
-      // Debounce the save operation
       debounceTimerRef.current = setTimeout(() => {
         localStorage.setItem(STORAGE_KEY, code);
-      }, 500); // Save after 500ms of no changes
+      }, 500);
     }
 
-    // Cleanup timer on unmount or code change
     return () => {
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
@@ -96,31 +86,20 @@ export function PageEditor() {
     setCode(newCode);
   }, []);
 
-  const handleInsertCode = useCallback((codeToInsert: string) => {
-    setCode(codeToInsert);
-  }, []);
-
   const handleTemplateSelect = useCallback((templateCode: string) => {
     setCode(templateCode);
   }, []);
 
   const handleRefresh = useCallback(() => {
-    // Immediately save to localStorage
     if (typeof window !== 'undefined') {
       localStorage.setItem(STORAGE_KEY, code);
     }
-    // Force diagram regeneration by updating refresh key
     setRefreshKey(prev => prev + 1);
   }, [code]);
 
   return (
     <div id="editor" className="flex flex-col h-screen w-full bg-background">
-      <TopBar
-        onTemplateSelect={handleTemplateSelect}
-        onToggleChat={() => setIsChatOpen(!isChatOpen)}
-        isChatOpen={isChatOpen}
-        currentCode={code}
-      />
+      <StudioTopBar onTemplateSelect={handleTemplateSelect} />
 
       <div className="flex-1 overflow-hidden h-screen">
         <ResizablePanelGroup direction="horizontal" className="h-full">
@@ -134,23 +113,9 @@ export function PageEditor() {
 
           <ResizableHandle className="w-1 bg-border hover-elevate" />
 
-          <ResizablePanel id="diagram-preview" order={2} defaultSize={isChatOpen ? 40 : 60} minSize={25}>
+          <ResizablePanel id="diagram-preview" order={2} defaultSize={60} minSize={25}>
             <DiagramPreview code={code} refreshKey={refreshKey} />
           </ResizablePanel>
-
-          {isChatOpen && (
-            <>
-              <ResizableHandle className="w-1 bg-border hover-elevate" />
-              <ResizablePanel id="chat-sidebar" order={3} defaultSize={20} minSize={15} maxSize={40}>
-                <ChatSidebar
-                  messages={chatMessages}
-                  onMessagesChange={setChatMessages}
-                  onInsertCode={handleInsertCode}
-                  onClose={() => setIsChatOpen(false)}
-                />
-              </ResizablePanel>
-            </>
-          )}
         </ResizablePanelGroup>
       </div>
     </div>

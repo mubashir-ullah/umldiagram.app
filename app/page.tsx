@@ -1,19 +1,48 @@
 import type { Metadata } from "next";
-import Script from "next/script";
-import { PageEditor } from "@/app/page-editor";
 import { HomePageSEO } from "@/app/page-seo";
-import { Footer } from "@/components/footer";
+import { SiteNav } from "@/components/site-nav";
+import { SiteFooter } from "@/components/site-footer";
+import { ToolEditor } from "@/components/tool-editor";
 import {
   getFAQPageSchema,
+  getHowToSchema,
   getSoftwareApplicationSchema,
   generateStructuredDataScript,
 } from "@/lib/seo/structured-data";
+import { HOME_FAQS, HOME_FEATURES, HOME_HOW_TO } from "@/lib/seo/home-content";
 import { SITE_URL } from "@/lib/seo/config";
+
+const HOME_DEFAULT_CODE = `@startuml
+!theme plain
+skinparam backgroundColor transparent
+skinparam defaultFontName JetBrains Mono
+
+title Simple Class Diagram
+
+class User {
+  -id: string
+  -username: string
+  -email: string
+  +login()
+  +logout()
+}
+
+class Post {
+  -id: string
+  -title: string
+  -content: string
+  -createdAt: Date
+  +publish()
+  +delete()
+}
+
+User "1" -- "*" Post : creates
+@enduml`;
 
 export const metadata: Metadata = {
   title: { absolute: "Free UML Diagram Tool Online | Class, Sequence, Use Case" },
   description:
-    "Create UML diagrams online for free. Class, sequence, activity, and use case diagrams with live preview, PlantUML, and AI. No install.",
+    "Create UML diagrams online for free. Class, sequence, activity, and use case diagram makers with live PlantUML preview. No install.",
   metadataBase: new URL(SITE_URL),
   alternates: {
     canonical: SITE_URL,
@@ -21,7 +50,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Free UML Diagram Tool Online | Class, Sequence, Use Case",
     description:
-      "Create UML diagrams online for free. Class, sequence, activity, and use case diagrams with live preview, PlantUML, and AI. No install.",
+      "Create UML diagrams online for free. Class, sequence, activity, and use case diagram makers with live PlantUML preview. No install.",
     url: SITE_URL,
     siteName: "UML Diagram Studio",
     type: "website",
@@ -39,54 +68,55 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Free UML Diagram Tool Online | Class, Sequence, Use Case",
     description:
-      "Create UML diagrams online for free. Class, sequence, activity, and use case diagrams with live preview, PlantUML, and AI. No install.",
+      "Create UML diagrams online for free. Class, sequence, activity, and use case diagram makers with live PlantUML preview. No install.",
     images: [`${SITE_URL}/og-image.png`],
   },
 };
 
-const faqSchema = getFAQPageSchema([
-  {
-    question: "What is a UML diagram?",
-    answer:
-      "A UML diagram is a standardized visual representation used in software engineering to model, design, and document software systems. UML stands for Unified Modeling Language.",
-  },
-  {
-    question: "Is this UML diagram tool free?",
-    answer:
-      "Yes, our UML diagram tool is completely free to use. You can create unlimited UML diagrams online without any restrictions or subscriptions.",
-  },
-  {
-    question: "What types of UML diagrams can I create?",
-    answer:
-      "You can create class diagrams, sequence diagrams, activity diagrams, use case diagrams, state diagrams, component diagrams, and more using our UML diagram generator.",
-  },
-  {
-    question: "Do I need to install anything to use this UML diagram tool?",
-    answer:
-      "No installation required! Our UML diagram tool works entirely in your web browser. Just open the website and start creating UML diagrams online.",
-  },
-]);
+const faqSchema = getFAQPageSchema(HOME_FAQS);
+const howToSchema = getHowToSchema(
+  HOME_HOW_TO.name,
+  HOME_HOW_TO.description,
+  HOME_HOW_TO.steps
+);
 
 export default function Home() {
   return (
-    <>
-      <Script
+    <div className="min-h-screen flex flex-col">
+      <script
         id="faq-schema"
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: generateStructuredDataScript(faqSchema),
         }}
       />
-      <Script
+      <script
+        id="howto-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: generateStructuredDataScript(howToSchema),
+        }}
+      />
+      <script
         id="software-application-schema"
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: generateStructuredDataScript(getSoftwareApplicationSchema()),
+          __html: generateStructuredDataScript(
+            getSoftwareApplicationSchema({ featureList: HOME_FEATURES })
+          ),
         }}
       />
-      <PageEditor />
-      <HomePageSEO />
-      <Footer />
-    </>
+      <SiteNav />
+      <main className="flex-1">
+        <div className="container mx-auto px-4 pt-6 max-w-5xl">
+          <ToolEditor
+            initialCode={HOME_DEFAULT_CODE}
+            storageKey="plantuml-code-home"
+          />
+        </div>
+        <HomePageSEO />
+      </main>
+      <SiteFooter />
+    </div>
   );
 }

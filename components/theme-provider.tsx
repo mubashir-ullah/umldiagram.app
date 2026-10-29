@@ -23,33 +23,24 @@ export function ThemeProvider({
   children,
   defaultTheme = "light",
 }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>(() => {
-    // Only access localStorage on the client side
-    if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem("theme");
-      return (stored as Theme) || defaultTheme;
-    }
-    return defaultTheme;
-  });
+  const [theme, setTheme] = useState<Theme>(defaultTheme);
+  const [ready, setReady] = useState(false);
 
-  // Load theme from localStorage on mount (client-side only)
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem("theme");
-      if (stored && (stored === "light" || stored === "dark")) {
-        setTheme(stored as Theme);
-      }
+    const stored = localStorage.getItem("theme");
+    if (stored === "light" || stored === "dark") {
+      setTheme(stored);
     }
+    setReady(true);
   }, []);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const root = document.documentElement;
-      root.classList.remove("light", "dark");
-      root.classList.add(theme);
-      localStorage.setItem("theme", theme);
-    }
-  }, [theme]);
+    if (!ready) return;
+    const root = document.documentElement;
+    root.classList.remove("light", "dark");
+    root.classList.add(theme);
+    localStorage.setItem("theme", theme);
+  }, [theme, ready]);
 
   const toggleTheme = () => {
     setTheme((prev) => (prev === "light" ? "dark" : "light"));

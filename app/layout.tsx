@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     template: "%s | UML Diagram Studio",
   },
   description:
-    "Create UML diagrams online for free. Class, sequence, activity, and use case diagrams with live preview, PlantUML, and AI. No install.",
+    "Create UML diagrams online for free. Class, sequence, activity, and use case diagram makers with live PlantUML preview. No install.",
   authors: [{ name: "Mubashir" }],
   creator: "UML Diagram Studio",
   publisher: "UML Diagram Studio",
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Free UML Diagram Tool Online | Class, Sequence, Use Case",
     description:
-      "Create UML diagrams online for free. Class, sequence, activity, and use case diagrams with live preview, PlantUML, and AI. No install.",
+      "Create UML diagrams online for free. Class, sequence, activity, and use case diagram makers with live PlantUML preview. No install.",
     url: SITE_URL,
     siteName: "UML Diagram Studio",
     type: "website",
@@ -54,18 +54,20 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Free UML Diagram Tool Online | Class, Sequence, Use Case",
     description:
-      "Create UML diagrams online for free. Class, sequence, activity, and use case diagrams with live preview, PlantUML, and AI. No install.",
+      "Create UML diagrams online for free. Class, sequence, activity, and use case diagram makers with live PlantUML preview. No install.",
     images: [`${SITE_URL}/og-image.png`],
     creator: "@umldiagram",
   },
   icons: {
     icon: [
+      { url: "/favicon-48.png", sizes: "48x48", type: "image/png" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
       { url: "/UML-Diagram.ico", sizes: "any" },
-      { url: "/UML-Diagram.ico", type: "image/x-icon" },
     ],
     shortcut: "/UML-Diagram.ico",
-    apple: "/UML-Diagram.ico",
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
   },
+  manifest: "/site.webmanifest",
   robots: {
     index: true,
     follow: true,
@@ -90,19 +92,21 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning className={`${inter.variable} ${jetbrainsMono.variable}`}>
       <head>
+        <link rel="icon" href="/favicon-48.png" type="image/png" sizes="48x48" />
         <link rel="icon" href="/UML-Diagram.ico" sizes="any" />
         <link rel="shortcut icon" href="/UML-Diagram.ico" />
-        <link rel="apple-touch-icon" href="/UML-Diagram.ico" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <link rel="manifest" href="/site.webmanifest" />
       </head>
       <body suppressHydrationWarning className="font-sans antialiased">
-        <Script
+        <script
           id="organization-schema"
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: generateStructuredDataScript(getOrganizationSchema()),
           }}
         />
-        <Script
+        <script
           id="website-schema"
           type="application/ld+json"
           dangerouslySetInnerHTML={{

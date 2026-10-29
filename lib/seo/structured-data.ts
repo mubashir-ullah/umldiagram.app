@@ -1,8 +1,13 @@
 import { SITE_URL } from "./config";
+import { HOME_FEATURES } from "./home-content";
+
+const ORGANIZATION_ID = `${SITE_URL}/#organization`;
+const WEBSITE_ID = `${SITE_URL}/#website`;
 
 export interface OrganizationSchema {
   "@context": string;
   "@type": string;
+  "@id": string;
   name: string;
   url: string;
   logo: string;
@@ -13,9 +18,11 @@ export interface OrganizationSchema {
 export interface WebSiteSchema {
   "@context": string;
   "@type": string;
+  "@id": string;
   name: string;
   url: string;
   description: string;
+  publisher: { "@id": string };
 }
 
 export interface SoftwareApplicationSchema {
@@ -31,6 +38,7 @@ export interface SoftwareApplicationSchema {
   };
   description: string;
   url: string;
+  featureList: string[];
 }
 
 export interface BreadcrumbListSchema {
@@ -107,9 +115,10 @@ export function getOrganizationSchema(): OrganizationSchema {
   return {
     "@context": "https://schema.org",
     "@type": "Organization",
+    "@id": ORGANIZATION_ID,
     name: "UML Diagram Studio",
     url: SITE_URL,
-    logo: `${SITE_URL}/UML-Diagram.ico`,
+    logo: `${SITE_URL}/logo.png`,
     description: "Free online UML diagram tool for creating professional class, sequence, activity, and use case diagrams.",
     sameAs: [
       "https://github.com/mubashir-ullah/UML-Diagram-Studio",
@@ -121,17 +130,24 @@ export function getWebSiteSchema(): WebSiteSchema {
   return {
     "@context": "https://schema.org",
     "@type": "WebSite",
+    "@id": WEBSITE_ID,
     name: "UML Diagram Studio",
     url: SITE_URL,
     description: "Free online UML diagram tool for creating professional diagrams.",
+    publisher: { "@id": ORGANIZATION_ID },
   };
 }
 
-export function getSoftwareApplicationSchema(): SoftwareApplicationSchema {
+export function getSoftwareApplicationSchema(overrides?: {
+  name?: string;
+  description?: string;
+  url?: string;
+  featureList?: string[];
+}): SoftwareApplicationSchema {
   return {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
-    name: "UML Diagram Studio",
+    name: overrides?.name ?? "UML Diagram Studio",
     applicationCategory: "WebApplication",
     operatingSystem: "Web Browser",
     offers: {
@@ -139,8 +155,11 @@ export function getSoftwareApplicationSchema(): SoftwareApplicationSchema {
       price: "0",
       priceCurrency: "USD",
     },
-    description: "Free online UML diagram tool with AI-powered code generation. Create class diagrams, sequence diagrams, activity diagrams, and more with real-time preview.",
-    url: SITE_URL,
+    description:
+      overrides?.description ??
+      "Free online UML diagram tool. Create class diagrams, sequence diagrams, activity diagrams, and more with real-time PlantUML preview.",
+    url: overrides?.url ?? SITE_URL,
+    featureList: overrides?.featureList ?? [...HOME_FEATURES],
   };
 }
 
@@ -173,7 +192,7 @@ export function getArticleSchema(
     "@type": "Article",
     headline,
     description,
-    image: image || `${SITE_URL}/UML-Diagram.ico`,
+    image: image || `${SITE_URL}/og-image.png`,
     datePublished,
     dateModified,
     author: {
@@ -185,7 +204,7 @@ export function getArticleSchema(
       name: "UML Diagram Studio",
       logo: {
         "@type": "ImageObject",
-        url: `${SITE_URL}/UML-Diagram.ico`,
+        url: `${SITE_URL}/logo.png`,
       },
     },
     mainEntityOfPage: {
@@ -241,6 +260,83 @@ export function getCollectionPageSchema(
     name,
     description,
     url,
+  };
+}
+
+export interface ItemListSchema {
+  "@context": string;
+  "@type": string;
+  name: string;
+  itemListElement: Array<{
+    "@type": string;
+    position: number;
+    name: string;
+    url: string;
+  }>;
+}
+
+export function getItemListSchema(
+  name: string,
+  items: Array<{ name: string; url: string }>
+): ItemListSchema {
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name,
+    itemListElement: items.map((item, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name: item.name,
+      url: item.url,
+    })),
+  };
+}
+
+export function getAboutPageSchema(): object {
+  return {
+    "@context": "https://schema.org",
+    "@type": "AboutPage",
+    "@id": `${SITE_URL}/about#webpage`,
+    name: "About UML Diagram Studio",
+    url: `${SITE_URL}/about`,
+    description:
+      "UML Diagram Studio is a free browser UML diagram toolkit with PlantUML live preview, focused makers, and PNG or SVG export.",
+    isPartOf: { "@id": WEBSITE_ID },
+    about: { "@id": ORGANIZATION_ID },
+  };
+}
+
+export function getContactPageSchema(): object {
+  return {
+    "@context": "https://schema.org",
+    "@type": "ContactPage",
+    "@id": `${SITE_URL}/contact#webpage`,
+    name: "Contact UML Diagram Studio",
+    url: `${SITE_URL}/contact`,
+    description:
+      "Contact UML Diagram Studio for questions about the free UML diagram tool, tutorials, or partnership inquiries.",
+    isPartOf: { "@id": WEBSITE_ID },
+    mainEntity: {
+      "@type": "Organization",
+      "@id": ORGANIZATION_ID,
+      email: "contact@umldiagram.app",
+    },
+  };
+}
+
+export function getWebPageSchema(
+  name: string,
+  description: string,
+  url: string
+): object {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name,
+    description,
+    url,
+    isPartOf: { "@id": WEBSITE_ID },
+    publisher: { "@id": ORGANIZATION_ID },
   };
 }
 

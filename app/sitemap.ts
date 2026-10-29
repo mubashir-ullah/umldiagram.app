@@ -1,15 +1,11 @@
 import { MetadataRoute } from "next";
-import { SITE_URL } from "@/lib/seo/config";
-import {
-  getBlogSlugsForSitemap,
-  getGallerySlugsForSitemap,
-} from "@/lib/seo/slugs";
+import { SITE_CONTENT_UPDATED, SITE_URL } from "@/lib/seo/config";
+import { getToolSlugsForSitemap } from "@/lib/seo/slugs";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = SITE_URL.replace(/\/$/, ""); // Ensure no trailing slash
-  const currentDate = new Date();
+  const baseUrl = SITE_URL.replace(/\/$/, "");
+  const lastModified = new Date(SITE_CONTENT_UPDATED);
 
-  // Helper function to ensure proper URL formatting (no trailing slashes except for root)
   const formatUrl = (path: string): string => {
     if (path === "/" || path === "") {
       return baseUrl;
@@ -17,101 +13,57 @@ export default function sitemap(): MetadataRoute.Sitemap {
     return `${baseUrl}${path.startsWith("/") ? path : `/${path}`}`.replace(/\/$/, "");
   };
 
-  // Static pages - ordered by priority
   const staticPages: MetadataRoute.Sitemap = [
     {
       url: formatUrl("/"),
-      lastModified: currentDate,
+      lastModified,
       changeFrequency: "daily",
       priority: 1.0,
     },
     {
+      url: formatUrl("/tools"),
+      lastModified,
+      changeFrequency: "weekly",
+      priority: 0.95,
+    },
+    {
       url: formatUrl("/studio"),
-      lastModified: currentDate,
+      lastModified,
       changeFrequency: "weekly",
       priority: 0.8,
     },
     {
-      url: formatUrl("/blog"),
-      lastModified: currentDate,
-      changeFrequency: "weekly",
-      priority: 0.9,
-    },
-    {
-      url: formatUrl("/gallery"),
-      lastModified: currentDate,
-      changeFrequency: "weekly",
-      priority: 0.9,
-    },
-    {
       url: formatUrl("/about"),
-      lastModified: currentDate,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: formatUrl("/contact"),
-      lastModified: currentDate,
+      lastModified,
       changeFrequency: "monthly",
       priority: 0.6,
     },
     {
+      url: formatUrl("/contact"),
+      lastModified,
+      changeFrequency: "monthly",
+      priority: 0.5,
+    },
+    {
       url: formatUrl("/privacy"),
-      lastModified: currentDate,
+      lastModified,
       changeFrequency: "yearly",
       priority: 0.3,
     },
     {
       url: formatUrl("/terms"),
-      lastModified: currentDate,
+      lastModified,
       changeFrequency: "yearly",
       priority: 0.3,
     },
   ];
 
-  // Blog posts - from single source of truth (lib/data/blog-posts-data)
-  const blogPages: MetadataRoute.Sitemap = getBlogSlugsForSitemap().map(
-    (entry) => {
-      const postDate = new Date(entry.date);
-      if (isNaN(postDate.getTime())) {
-        return {
-          url: formatUrl(`/blog/${entry.slug}`),
-          lastModified: currentDate,
-          changeFrequency: "monthly" as const,
-          priority: 0.8,
-        };
-      }
-      return {
-        url: formatUrl(`/blog/${entry.slug}`),
-        lastModified: postDate,
-        changeFrequency: "monthly" as const,
-        priority: 0.8,
-      };
-    }
-  );
+  const toolPages: MetadataRoute.Sitemap = getToolSlugsForSitemap().map((slug) => ({
+    url: formatUrl(`/tools/${slug}`),
+    lastModified,
+    changeFrequency: "weekly" as const,
+    priority: 0.9,
+  }));
 
-  // Gallery detail pages - from single source of truth (lib/data/gallery-items-data)
-  const galleryPages: MetadataRoute.Sitemap =
-    getGallerySlugsForSitemap().map((slug) => ({
-      url: formatUrl(`/gallery/${slug}`),
-      lastModified: currentDate,
-      changeFrequency: "monthly" as const,
-      priority: 0.8,
-    }));
-
-  // Combine all pages and remove duplicates by URL
-  const allPages = [...staticPages, ...blogPages, ...galleryPages];
-  const uniquePages = Array.from(
-    new Map(allPages.map((page) => [page.url, page])).values()
-  );
-
-  // Sort by priority (descending) then by URL for consistent ordering
-  uniquePages.sort((a, b) => {
-    if (a.priority !== b.priority) {
-      return (b.priority || 0) - (a.priority || 0);
-    }
-    return a.url.localeCompare(b.url);
-  });
-
-  return uniquePages;
+  return [...staticPages, ...toolPages];
 }

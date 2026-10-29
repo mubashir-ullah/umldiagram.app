@@ -1,5 +1,10 @@
 import type { Metadata } from "next";
 import { SITE_URL } from "@/lib/seo/config";
+import {
+  generateStructuredDataScript,
+  getBreadcrumbListSchema,
+  getWebPageSchema,
+} from "@/lib/seo/structured-data";
 
 export const metadata: Metadata = {
   title: { absolute: "Terms of Use | UML Diagram Studio" },
@@ -19,5 +24,34 @@ export const metadata: Metadata = {
 };
 
 export default function TermsLayout({ children }: { children: React.ReactNode }) {
-  return children;
+  return (
+    <>
+      <script
+        id="terms-page-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: generateStructuredDataScript(
+            getWebPageSchema(
+              "Terms of Use",
+              "Terms for using the free UML diagram tool at umldiagram.app, including content ownership and acceptable use.",
+              `${SITE_URL}/terms`
+            )
+          ),
+        }}
+      />
+      <script
+        id="terms-breadcrumb-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: generateStructuredDataScript(
+            getBreadcrumbListSchema([
+              { name: "Home", url: SITE_URL },
+              { name: "Terms", url: `${SITE_URL}/terms` },
+            ])
+          ),
+        }}
+      />
+      {children}
+    </>
+  );
 }

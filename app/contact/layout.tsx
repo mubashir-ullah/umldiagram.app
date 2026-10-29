@@ -1,5 +1,10 @@
 import type { Metadata } from "next";
 import { SITE_URL } from "@/lib/seo/config";
+import {
+  generateStructuredDataScript,
+  getBreadcrumbListSchema,
+  getContactPageSchema,
+} from "@/lib/seo/structured-data";
 
 export const metadata: Metadata = {
   title: { absolute: "Contact UML Diagram Studio" },
@@ -26,5 +31,28 @@ export const metadata: Metadata = {
 };
 
 export default function ContactLayout({ children }: { children: React.ReactNode }) {
-  return children;
+  return (
+    <>
+      <script
+        id="contact-page-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: generateStructuredDataScript(getContactPageSchema()),
+        }}
+      />
+      <script
+        id="contact-breadcrumb-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: generateStructuredDataScript(
+            getBreadcrumbListSchema([
+              { name: "Home", url: SITE_URL },
+              { name: "Contact", url: `${SITE_URL}/contact` },
+            ])
+          ),
+        }}
+      />
+      {children}
+    </>
+  );
 }
