@@ -92,6 +92,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning className={`${inter.variable} ${jetbrainsMono.variable}`}>
       <head>
+        <meta name="google-adsense-account" content="ca-pub-7603836772359035" />
         <link rel="icon" href="/favicon-48.png" type="image/png" sizes="48x48" />
         <link rel="icon" href="/UML-Diagram.ico" sizes="any" />
         <link rel="shortcut icon" href="/UML-Diagram.ico" />
